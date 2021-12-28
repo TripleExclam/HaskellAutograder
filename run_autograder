@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Set up autograder files
+
+cd /autograder/source/
+
+cp /autograder/submission/* .
+
+stack test --test-arguments=--xml=test.xml
+
+python3 produceJSON.py
