@@ -51,5 +51,5 @@ bannedFunctions = testGroup "Banned Functions"
     [ testCase "v : Banned functions : -10" $ do
         mapUse <- bannedFuncs "src/Lib.hs" "Lib" 
             ["map", "foldl", "foldr", "zip"]
-        assertEqual "Banned function detection" False mapUse
+        assertEqual "Banned function detection" True mapUse
     ]

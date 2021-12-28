@@ -4,7 +4,7 @@ import json
 import os
 
 # match any word with a " : " between any numbers. Option to start with "v : "
-pattern = re.compile("(?:(v) : )?(.*) : ([0-9]+\.?[0-9]*|\.[0-9]+)") 
+pattern = re.compile("(?:(v) : )?(.*) : (-?[0-9]+\.?[0-9]*|\.[0-9]+)") 
 
 def extract_test_info(test_name):
     result = pattern.match(test_name)
