@@ -14,8 +14,8 @@ each test case (whether a proprty or unit test) is specified by a description of
 Tests are run on gradescope with output redirected to a file, which is then parsed under the naming conventions and converted to a JSON output file for reporting on gradescope.
 -}
 main :: IO ()
-main = defaultMainWithIngredients [antXMLRunner] tests
--- main = defaultMain tests
+-- main = defaultMainWithIngredients [antXMLRunner] tests
+main = defaultMain tests
 
 tests :: TestTree
 tests = testGroup "Tests" [localOption (mkTimeout 1) smallCheckTests, quickCheckTests, unitTests, bannedFunctions]
