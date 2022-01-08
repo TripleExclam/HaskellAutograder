@@ -18,14 +18,12 @@ import TcRnTypes
 
 {-
 Uses the GHC API to load a given module and parse it for all imported functions.
-The imported functions are converted to strings and a True or False flag retured
-(wrapped in the IO monad) based on whether or not any of the functions match the
-fNames argument.
+The imported functions are converted to strings and returned.
 
-Example usage: bannedFuncs "src/Permute.hs" "Permute" ["map", "foldl", "foldr"]
+Example usage: bannedFuncs "src/Permute.hs" "Permute"
 -}
 bannedFuncs :: String -> String -> [String] -> IO Bool 
-bannedFuncs modPath modName fNames = runGhc (Just libdir) $ do
+bannedFuncs modPath modName = runGhc (Just libdir) $ do
         dflags <- getSessionDynFlags
         let compdflags = foldl xopt_set dflags [Cpp, ImplicitPrelude, MagicHash]
         setSessionDynFlags compdflags
@@ -39,4 +37,4 @@ bannedFuncs modPath modName fNames = runGhc (Just libdir) $ do
         let (tcenv, moddets) = tm_internals_ tmod
 
         let names = map getOccString $ concatMap (map gre_name) $ occEnvElts $ tcg_rdr_env tcenv
-        return $ or [x `elem` names | x <- fNames]
+        return names

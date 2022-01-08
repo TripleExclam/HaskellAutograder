@@ -4,37 +4,63 @@ import re
     
 pattern = re.compile("(?:(v) : )?(.*) : (-?[0-9]+\.?[0-9]*|\.[0-9]+)") 
 
-def check_file_names(files):
-    for file in files:
-        text_file = open(os.path.join("test", file), 'r')
-        text = text_file.read()
-        text_file.close()
+def check_file_names():
+    """Check that Spec.hs will work on gradescope."""
+    test_path = os.path.join("test", "Spec.hs")
+    text_file = open(test_path, 'r')
 
-        test_cases = re.findall(r'(SC.testProperty|QC.testProperty|testCase) "(.*)"', text)
+    text = ""
+    for line in text_file:
+        # This ensures tests will be pushed to xml on gradescope
+        if "main = defaultMain tests\n" == line:
+            line = "main = defaultMainWithIngredients [antXMLRunner] tests -- main = defaultMain tests\n"
+        text += line
 
-        for case in test_cases:
-            print("Found:", case[0], "with description", case[1], end=' ')
+    text_file.close()
 
-            result = pattern.match(case[1])
-            if result:
-                print("\033[92mValid test\033[0m")
-            else:
-                print("\033[91mTest has an error with its description, please revise\033[0m")
+    os.rename(test_path, os.path.join("test", "temp.hs"))
+
+    writing_file = open(test_path, 'w')
+    writing_file.write(text)
+    writing_file.close()
+
+    test_cases = re.findall(r'(SC.testProperty|QC.testProperty|testCase) "(.*)"', text)
+
+    for case in test_cases:
+        print("Found:", case[0], "with description", case[1], end=' ')
+
+        result = pattern.match(case[1])
+        if result:
+            print("\033[92mValid test\033[0m") # Green
+        else:
+            print("\033[91mTest has an error with its description, please revise\033[0m") # Red
 
 
-zf = zipfile.ZipFile("autograder.zip", "w")
-for dirname, _, files in os.walk("."):
-    if '.stack-work' in dirname or '.git' in dirname:
-        continue
-    elif 'test' in dirname:
-        check_file_names(files)
-
+def write_directory(zf, dirname, files):
     zf.write(dirname)
     for filename in files:
         if '.zip' in filename or '.gitignore' in filename:
             continue
         zf.write(os.path.join(dirname, filename))
 
-print("Successfully zipped autograder")
+def create_zip():
+    zf = zipfile.ZipFile("autograder.zip", "w")
+    for dirname, _, files in os.walk("."):
+        if '.stack-work' in dirname or '.git' in dirname:
+            continue
+        elif 'test' in dirname:
+            if "Spec.hs" not in files:
+                raise ValueError('Test folder is missing Spec.hs')
+            check_file_names()
+            write_directory(zf, dirname, files)
+            os.remove(os.path.join("test", "Spec.hs"))
+            os.rename(os.path.join("test", "temp.hs"), os.path.join("test", "Spec.hs"))
+        else:
+            write_directory(zf, dirname, files)
 
-zf.close()
+    print("Successfully zipped autograder")
+
+    zf.close()
+
+if __name__ == "__main__":
+    create_zip()
