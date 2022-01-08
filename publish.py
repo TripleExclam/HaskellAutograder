@@ -4,9 +4,9 @@ import re
     
 pattern = re.compile("(?:(v) : )?(.*) : (-?[0-9]+\.?[0-9]*|\.[0-9]+)") 
 
-def check_file_names():
+def check_tests(file):
     """Check that Spec.hs will work on gradescope."""
-    test_path = os.path.join("test", "Spec.hs")
+    test_path = os.path.join("test", file)
     text_file = open(test_path, 'r')
 
     text = ""
@@ -18,11 +18,12 @@ def check_file_names():
 
     text_file.close()
 
-    os.rename(test_path, os.path.join("test", "temp.hs"))
+    if file == "Spec.hs":
+        os.rename(test_path, os.path.join("test", "temp.hs"))
 
-    writing_file = open(test_path, 'w')
-    writing_file.write(text)
-    writing_file.close()
+        writing_file = open(test_path, 'w')
+        writing_file.write(text)
+        writing_file.close()
 
     test_cases = re.findall(r'(SC.testProperty|QC.testProperty|testCase) "(.*)"', text)
 
@@ -51,7 +52,8 @@ def create_zip():
         elif 'test' in dirname:
             if "Spec.hs" not in files:
                 raise ValueError('Test folder is missing Spec.hs')
-            check_file_names()
+            for file in files:
+                check_tests(file)
             write_directory(zf, dirname, files)
             os.remove(os.path.join("test", "Spec.hs"))
             os.rename(os.path.join("test", "temp.hs"), os.path.join("test", "Spec.hs"))
