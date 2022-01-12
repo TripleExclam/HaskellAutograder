@@ -48,7 +48,8 @@ unitTests = testGroup "Unit Tests"
 bannedFunctions :: TestTree
 bannedFunctions = testGroup "Banned Functions"  
     [ testCase "v : Banned functions : -10" $ do
-        mapUse <- bannedFuncs "src/Lib.hs" "Lib" 
-            ["map", "foldl", "foldr", "zip"]
-        assertEqual "Banned function detection" True mapUse
+        moduleFuncs <- bannedFuncs "src/Lib.hs" "Lib"
+        let banned = ["map", "fold", "foldl", "foldr", "zip"]
+        assertEqual "Banned function detection" 
+            (or [x `elem` moduleFuncs | x <- banned]) True
     ]
