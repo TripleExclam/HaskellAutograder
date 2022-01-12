@@ -3,6 +3,8 @@ import re
 import json
 import os
 
+COMP_ERROR_STR = "Check that each module exports the correct functions and the examples provided run in ghci"
+
 # match any word with a " : " between any numbers. Option to start with "v : "
 pattern = re.compile("(?:(v) : )?(.*) : (-?[0-9]+\.?[0-9]*|\.[0-9]+)") 
 
@@ -19,7 +21,7 @@ def xml_to_json(file_name):
 
     conversion = {"execution_time": float(root.attrib['time']), 
         "visibility": "after_published",
-        "stdout_visibility": "after_published"}
+        "stdout_visibility": "visible"}
 
     tests = []
     
@@ -52,7 +54,12 @@ def check_test_run(file_name):
     
     conversion = {"score": 0.0,
         "visibility": "after_published",
-        "stdout_visibility": "visible"}
+        "stdout_visibility": "after_published",
+        "tests": [{"name": "Compilation error", 
+                "visibility": "visible",
+                "output": COMP_ERROR_STR, 
+                "score": 0, "max_score": 0}]
+        }
         
     with open('/autograder/results/results.json', 'w') as f:
         json.dump(conversion, f)
