@@ -19,7 +19,7 @@ def xml_to_json(file_name):
 
     conversion = {"execution_time": float(root.attrib['time']), 
         "visibility": "after_published",
-        "stdout_visibility": "visible"}
+        "stdout_visibility": "after_published"}
 
     tests = []
     
